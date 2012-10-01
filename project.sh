@@ -1,0 +1,6 @@
+name        "stdlib"
+version     "1.0.0"
+author      "Preston Koprivica"
+email       "pkopriv2@gmail.com"
+description "The standard bash library."
+file        "*.sh"
