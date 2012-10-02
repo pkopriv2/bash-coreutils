@@ -4,7 +4,7 @@
 # simple stacks of traps.  It does so by providing a "wrapper"
 # function 
 
-require "std-lib/fail.sh"
+require "lib/fail.sh"
 
 declare -a traps
 
