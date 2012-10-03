@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+
+require 'lib/ebash/ebash.sh'
+
+# make the call to process the file.
+ebash "$@" 
