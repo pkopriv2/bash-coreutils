@@ -27,10 +27,13 @@ ebash() {
 	fi 
 
 	local delim=${ebash_delim:-"--"}
-	declare local cmd
 
 	(
+		unset cmd
+		declare local cmd
+
 		{
+			echo "cat - <<EOF"
 			while IFS='' read -r line
 			do
 				# is this the first line, and is it a bash cmd?
@@ -67,6 +70,9 @@ ebash() {
 	)
 
 	(
+		set -o errtrace
+		set -o errexit
+
 		ebash_on_exit() {
 			rm -f $tmp_file
 		}
@@ -82,14 +88,10 @@ ebash() {
 			fail "Error procesing template: $file: $line_num"
 		}
 
-		trap_push "ebash_on_exit" EXIT 
-		trap_push "ebash_on_template_error" ERR
+
+		trap 'ebash_on_exit' EXIT
+		trap 'ebash_on_template_error' ERR
 
 		source $tmp_file
-
-		trap_pop ERR
-		trap_pop EXIT
-		
-		ebash_on_exit
 	)
 }
