@@ -26,80 +26,70 @@ ebash() {
 		fail "Must provide a ebash file."
 	fi 
 
-	delim=${ebash_delim:-"--"}
+	local delim=${ebash_delim:-"--"}
+	declare local cmd
 
-	{
-		while read line 
-		do
-			# is this the first line, and is it a bash cmd?
-			if [[ -z $cmd ]] && ! echo $line | grep -q "^$delim"
-			then
-				cmd=false
-				echo "cat - <<-EOF"
-				echo $line
-				continue
-			fi
-
-			# is this the start or end of a bash cmd area?
-			if echo $line | grep -q "^$delim"
-			then 
-				if [[ -z $cmd ]] || ! $cmd
+	(
+		{
+			while IFS='' read -r line
+			do
+				# is this the first line, and is it a bash cmd?
+				if [[ -z $cmd ]] && ! echo $line | grep -q "^$delim"
 				then
-					echo "EOF"
-					cmd=true
+					cmd=false
+					echo "cat - <<EOF"
+					printf "%s\n" "$line"
 					continue
 				fi
 
-				echo "cat - <<-EOF"
-				cmd=false
-				continue
-			fi
+				# is this the start or end of a bash cmd area?
+				if echo $line | grep -q "^$delim"
+				then 
+					if [[ -z $cmd ]] || ! $cmd
+					then
+						echo "EOF"
+						cmd=true
+						continue
+					fi
 
-			echo $line
+					echo "cat - <<EOF"
+					cmd=false
+					continue
+				fi
 
-		done < $file
+				printf "%s\n" "$line"
 
-		$cmd || echo "EOF" 
+			done < $file
 
-	} | cat - > $tmp_file
+			$cmd || echo "EOF" 
 
-	ebash_on_exit() {
-		rm -f $tmp_file
-	}
+		} > $tmp_file
+	)
 
-	ebash_on_source_error() {
-		local line_num=$1
+	(
+		ebash_on_exit() {
+			rm -f $tmp_file
+		}
 
-		fail "Error sourcing stdin: $line_num"
-	}
+		ebash_on_template_error() {
+			local line_num=$1
 
-	ebash_on_template_error() {
-		local line_num=$1
+			# The line number of the /tmp/bashee.out file will be
+			# offset by one from the real template since we 
+			# added an extra line at the beginning.
+			(( line_num-- )) 
 
-		# The line number of the /tmp/bashee.out file will be
-		# offset by one from the real template since we 
-		# added an extra line at the beginning.
-		(( line_num-- )) 
+			fail "Error procesing template: $file: $line_num"
+		}
 
-		fail "Error procesing template: $file: $line_num"
-	}
+		trap_push "ebash_on_exit" EXIT 
+		trap_push "ebash_on_template_error" ERR
 
-	trap_push "ebash_on_exit" EXIT 
-	trap_push "ebash_on_source_error" ERR
+		source $tmp_file
 
-
-	if ! test -t 0
-	then
-		source /dev/stdin
-	fi
-
-	trap_pop ERR
-	trap_push "ebash_on_template_error" ERR
-
-	source $tmp_file
-
-	trap_pop ERR
-	trap_pop EXIT
-	
-	ebash_on_exit
+		trap_pop ERR
+		trap_pop EXIT
+		
+		ebash_on_exit
+	)
 }
