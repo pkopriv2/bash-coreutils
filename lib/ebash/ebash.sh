@@ -1,7 +1,6 @@
 #! /usr/bin/env bash 
 
-require "lib/console.sh"
-require "lib/trap.sh"
+require "lib/fail.sh"
 
 # Processes an embedded bash file (*.esh) and if successful, prints
 # the outputs to standard out.
