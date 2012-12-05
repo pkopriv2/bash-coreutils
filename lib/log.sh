@@ -5,6 +5,10 @@ log_color=${log_color:-"true"}
 log_color_id=${log_color_id:-"2"}
 log_pid=${log_pid:-$$}
 
+log_date() {
+	date "+%Y-%m-%d %H:%M:%S"
+}
+
 debug_levels=( DEBUG )
 log_debug() {
 	if ! array_contains "$log_level" "${debug_levels[@]}" 
@@ -14,9 +18,9 @@ log_debug() {
 
 	if [[ "$log_color" != "true" ]] || ! tput setaf &> /dev/null 
 	then
-		echo -e "[$log_pid] [DEBUG]: $1"
+		echo -e "[$(log_date)] [$log_pid] [DEBUG]: $1"
 	else
-		echo -e "$(tput setaf $log_color_id)[$log_pid] [DEBUG]$(tput sgr0): $1"
+		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [DEBUG]$(tput sgr0): $1"
 	fi
 }
 
@@ -32,9 +36,9 @@ log_info() {
 
 	if [[ "$log_color" != "true" ]] || ! tput setaf &> /dev/null 
 	then
-		echo -e "[$log_pid] [INFO]: $1"
+		echo -e "[$(log_date)] [$log_pid] [INFO]: $1"
 	else
-		echo -e "$(tput setaf $log_color_id)[$log_pid] [INFO]$(tput sgr0): $1"
+		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [INFO]$(tput sgr0): $1"
 	fi
 }
 
@@ -51,8 +55,8 @@ log_error() {
 
 	if [[ "$log_color" != "true" ]] || ! tput setaf &> /dev/null 
 	then
-		echo "[$log_pid] [ERROR]: $1" 1>&2
+		echo -e "[$(log_date)] [$log_pid] [INFO]: $1"
 	else
-		echo -e "$(tput setaf $log_color_id)[$log_pid] [ERROR] $(tput sgr0): $1" 1>&2
+		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [INFO]$(tput sgr0): $1"
 	fi
 }
