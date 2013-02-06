@@ -1,9 +1,24 @@
 require "lib/array.sh"
+require "lib/fail.sh"
 
 log_level=${log_level:-"INFO"}
 log_color=${log_color:-"true"}
 log_color_id=${log_color_id:-"2"}
 log_pid=${log_pid:-$$}
+log_context=${log_context:-""}
+
+# usage: log_context_add <key> [<val>]
+log_context_add() {
+	if (( $# < 1 ))
+	then
+		fail "Usage: log_context_add <key> <val>"
+	fi
+
+	local key=$1
+	local val=$2
+
+	log_context="${log_context:+"$log_context "}$key${val:+=$val}"
+}
 
 log_date() {
 	date "+%Y-%m-%d %H:%M:%S"
@@ -18,9 +33,9 @@ log_debug() {
 
 	if [[ "$log_color" != "true" ]] || ! tput setaf &> /dev/null 
 	then
-		echo -e "[$(log_date)] [$log_pid] [DEBUG]: $1"
+		echo -e "[$(log_date)] [$log_pid] [$log_context] [DEBUG]: $1"
 	else
-		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [DEBUG]$(tput sgr0): $1"
+		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [$log_context] [DEBUG]$(tput sgr0): $1"
 	fi
 }
 
@@ -36,9 +51,9 @@ log_info() {
 
 	if [[ "$log_color" != "true" ]] || ! tput setaf &> /dev/null 
 	then
-		echo -e "[$(log_date)] [$log_pid] [INFO]: $1"
+		echo -e "[$(log_date)] [$log_pid] [$log_context] [INFO]: $1"
 	else
-		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [INFO]$(tput sgr0): $1"
+		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [$log_context] [INFO]$(tput sgr0): $1"
 	fi
 }
 
@@ -55,8 +70,8 @@ log_error() {
 
 	if [[ "$log_color" != "true" ]] || ! tput setaf &> /dev/null 
 	then
-		echo -e "[$(log_date)] [$log_pid] [INFO]: $1"
+		echo -e "[$(log_date)] [$log_pid] [$log_context] [ERROR]: $1"
 	else
-		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [INFO]$(tput sgr0): $1"
+		echo -e "$(tput setaf $log_color_id)[$(log_date)] [$log_pid] [$log_context] [ERROR]$(tput sgr0): $1"
 	fi
 }

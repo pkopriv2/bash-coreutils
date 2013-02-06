@@ -1,5 +1,5 @@
 name        "bash-coreutils"
-version     "1.0.1"
+version     "1.1.0"
 author      "Preston Koprivica"
 email       "pkopriv2@gmail.com"
 description "The standard bash library."
