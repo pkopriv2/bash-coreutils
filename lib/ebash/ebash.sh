@@ -1,6 +1,7 @@
 #! /usr/bin/env bash 
 
 require "lib/fail.sh"
+require "lib/random.sh"
 
 # Processes an embedded bash file (*.esh) and if successful, prints
 # the outputs to standard out.
@@ -19,7 +20,7 @@ ebash() {
 		fail "Must provide a ebash file."
 	fi 
 
-	local tmp_file=/tmp/ebash.tmp
+	local tmp_file=/tmp/ebash.$(random_str).tmp
 	if ! touch $tmp_file &> /dev/null
 	then
 		fail "Must provide a ebash file."
@@ -92,5 +93,5 @@ ebash() {
 		trap 'ebash_on_template_error' ERR
 
 		source $tmp_file
-	)
+	) || fail 'Error interpretting embedded bash file'
 }
